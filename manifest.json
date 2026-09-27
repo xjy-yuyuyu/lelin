@@ -1,0 +1,12 @@
+{
+  "name": "乐麟小窝",
+  "short_name": "乐麟小窝",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12233a",
+  "theme_color": "#3e97d6",
+  "icons": [
+    { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
