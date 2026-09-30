@@ -254,6 +254,31 @@ select.ctl:focus,input.ctl:focus,textarea.ctl:focus{border-color:var(--blue)}
 .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
 /* 欢迎弹窗 */
 .welav{text-align:center;font-size:52px;margin-bottom:4px}
+/* ---------- 玩乐：发泄屋/转盘/骰子/年报 ---------- */
+.vent-stage{position:relative;height:270px;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(ellipse at center,rgba(255,143,94,.10),transparent 70%);border-radius:16px;overflow:hidden}
+.vent-doll{height:225px;object-fit:contain;cursor:pointer;transition:transform .12s;user-select:none;-webkit-user-select:none}
+.vent-doll.hit{animation:ventShake .3s}
+.vent-doll.ko{transform:rotate(84deg) translate(-16px,26px);opacity:.72;transition:transform .45s}
+@keyframes ventShake{0%{transform:translate(0)}25%{transform:translate(-9px,3px) rotate(-5deg)}55%{transform:translate(8px,-2px) rotate(4deg)}100%{transform:translate(0)}}
+.vent-hp{position:absolute;top:10px;left:12%;right:12%;height:12px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+.vent-hp>div{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,#7ee08a,#ffd76e);transition:width .2s}
+.vent-line{position:absolute;top:28px;left:50%;transform:translateX(-50%);background:var(--solid);border:1px solid var(--line);border-radius:12px;padding:5px 12px;font-size:12px;font-weight:700;white-space:nowrap;max-width:88%}
+.vent-tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.wheelbox{position:relative;width:240px;margin:6px auto 2px}
+#wheelPtr{text-align:center;color:var(--deepr);font-size:18px;line-height:1;margin-bottom:-4px}
+#wheelCv{display:block;margin:0 auto}
+.dicebox{font-size:56px;text-align:center;padding:8px 0 4px;min-height:84px}
+.dicebox.roll{animation:diceSpin .6s}
+@keyframes diceSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(200deg) scale(1.25)}100%{transform:rotate(360deg) scale(1)}}
+.foodchip{display:inline-block;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:rgba(62,151,214,.08);font-size:12px;margin:2px 4px 2px 0}
+.foodchip b{cursor:pointer;margin-left:5px;opacity:.5}
+.foodchip b:hover{opacity:1}
+.yearcard{background:linear-gradient(180deg,#fff9ec,#fff1d6);border:1px solid #eeddb8;border-radius:16px;padding:16px;color:#5a4632}
+.yearrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed #eeddb8;font-size:14px}
+.yearrow:last-child{border-bottom:none}
+.yearrow b{margin-left:auto;font-size:17px;color:#c2587a}
+.yeartitle{text-align:center;font-weight:800;font-size:15px;margin-bottom:6px}
+
 /* ---------- 云同步 ---------- */
 #peerLine{font-size:12px;margin-top:10px;color:var(--muted)}
 #syncState{color:var(--muted)}
@@ -319,7 +344,10 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
   .tl-item.left .tl-dot,.tl-item.right .tl-dot{left:-58px;right:auto}
   .tl-item.right .tl-card{border-right:1px solid var(--line);border-left:4px solid var(--rose)}
   header h1{font-size:17px}
+  .tabbtn{padding:8px 12px;font-size:13.5px}
   .doll{height:190px}
+  .vent-doll{height:180px}
+  .vent-stage{height:220px}
   .doll.photo{height:180px}
 }
 </style>
@@ -339,7 +367,9 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
   <div class="tabs">
     <button class="tabbtn on" data-tab="home">🏠 首页</button>
     <button class="tabbtn" data-tab="diary">📖 日常</button>
-    <button class="tabbtn" data-tab="fun">🎁 趣味</button>
+    <button class="tabbtn" data-tab="treasure">💝 珍惜</button>
+    <button class="tabbtn" data-tab="shop">🎟️ 商店</button>
+    <button class="tabbtn" data-tab="play">🎮 玩乐</button>
   </div>
 
   <!-- ============ 首页 ============ -->
@@ -408,7 +438,7 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
   </section>
 
   <!-- ============ 趣味 ============ -->
-  <section class="tabsec" id="tab-fun">
+  <section class="tabsec" id="tab-treasure">
     <div class="grid2">
       <div class="card">
         <h2>📅 纪念日</h2>
@@ -433,7 +463,17 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
       </div>
     </div>
 
-    <div class="grid2" style="margin-top:18px">
+          <div class="card">
+        <h2>⏳ 时间胶囊</h2>
+        <div id="capsuleList"></div>
+        <div class="addrow">
+          <button class="btn o small" id="capWrite">✍️ 写一封胶囊信</button>
+        </div>
+        <div class="hint">开启日期前谁也看不到内容，到期当天首页会提醒。</div>
+      </div>
+  </section>
+
+  <section class="tabsec" id="tab-shop"><div class="grid2" style="margin-top:18px">
       <div class="card">
         <h2>🎟️ 爱心兑换券</h2>
         <div class="balrow">
@@ -462,14 +502,59 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
         </div>
         <div class="hint">币不能自己攒，只能由对方每天发；谁换的券就归谁用，账本全都记着。</div>
       </div>
-      <div class="card">
-        <h2>⏳ 时间胶囊</h2>
-        <div id="capsuleList"></div>
-        <div class="addrow">
-          <button class="btn o small" id="capWrite">✍️ 写一封胶囊信</button>
-        </div>
-        <div class="hint">开启日期前谁也看不到内容，到期当天首页会提醒。</div>
+
+  </section>
+
+  <section class="tabsec" id="tab-play">
+    <div class="card">
+      <h2>🥊 发泄屋 <span class="muted" style="font-size:12px;font-weight:400">吵架后解气专用，他不会真疼的</span></h2>
+      <div class="vent-stage" id="ventStage">
+        <div class="vent-hp"><div id="ventHpFill"></div></div>
+        <img class="vent-doll" id="ventDoll" alt="天麟">
+        <div class="vent-line" id="ventLine">（他还不知道即将发生什么）</div>
       </div>
+      <div class="vent-tools">
+        <button class="ibtn b5" id="ventWhip">🪢 一鞭子</button>
+        <button class="ibtn b3" id="ventFist">🤜 小拳拳</button>
+        <button class="ibtn b1" id="ventMakeup">🤝 和好</button>
+      </div>
+      <div class="loverow" style="margin-top:10px">
+        <span class="lovelevel" style="color:#ff8f5e;background:rgba(255,143,94,.14);border-color:rgba(255,143,94,.35)">😤 解气值</span>
+        <div class="lovebar"><div id="ventFill" style="background:linear-gradient(90deg,#ffd76e,#ff8f5e)"></div></div>
+        <span class="lovetext" id="ventText">0/100</span>
+      </div>
+      <div class="hint">点他就"打"一下（手机上戳戳也行）；解气值满了他会喊"抱抱就原谅你"——记得回首页抱抱和好呀。</div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h2>🍩 今晚吃什么 <span class="muted" style="font-size:12px;font-weight:400">转盘说了算</span></h2>
+        <div class="wheelbox"><div id="wheelPtr">▼</div><canvas id="wheelCv" width="240" height="240"></canvas></div>
+        <div class="addrow" style="justify-content:center"><button class="btn o" id="spinBtn">🎯 开始转！</button></div>
+        <div class="hint" id="wheelResult" style="text-align:center;min-height:18px"></div>
+        <div class="addrow">
+          <input type="text" class="ctl" id="foodInput" placeholder="加个想吃的到池子里">
+          <button class="btn small" id="foodAdd">加入</button>
+        </div>
+        <div id="foodList" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <h2>🎲 情侣骰子 & 真心话</h2>
+        <div class="dicebox" id="diceFace">🎲</div>
+        <div class="addrow" style="justify-content:center">
+          <button class="ibtn b2" id="diceBtn">🎲 摇个甜蜜任务</button>
+          <button class="ibtn b1" id="truthBtn">💬 真心话</button>
+          <button class="ibtn b4" id="dareBtn">🔥 大冒险</button>
+        </div>
+        <div class="vent-line" id="diceResult" style="position:static;transform:none;display:block;text-align:center;white-space:normal;margin-top:8px">点一下，摇个甜蜜任务～</div>
+        <div class="hint" style="text-align:center">摇到什么做什么，输了也要做哦。</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>📊 恋爱年报 <span class="muted" style="font-size:12px;font-weight:400">你们的数据都在这了</span></h2>
+      <div class="addrow" style="justify-content:center">
+        <button class="btn o" id="yearBtn">📊 生成我们的年报</button>
+      </div>
+      <div class="hint" style="text-align:center">一键生成小窝数据卡片，截图发朋友圈刚刚好。</div>
     </div>
   </section>
 </main>
@@ -523,11 +608,9 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
       <div class="hint">不上传就继续用内置的卡通小人哦</div>
     </div>
     <div class="formrow">
-      <label>☁️ 云端同步（LeanCloud，两台设备数据互通；不填则单机）</label>
-      <input type="text" class="ctl" id="sCloudId" placeholder="AppID">
-      <input type="text" class="ctl" id="sCloudKey" placeholder="AppKey" style="margin-top:6px">
-      <input type="text" class="ctl" id="sCloudUrl" placeholder="REST API 服务器地址，如 https://xxxx.lc-cn-n1-shared.com" style="margin-top:6px">
-      <div class="hint">三项填全并保存即启用：日记、心愿、爱心币、胶囊在你们两台设备间互通；全部清空保存则关闭。</div>
+      <label>☁️ 云端同步（Cloudflare Worker，与投票吧同一套服务）</label>
+      <input type="text" class="ctl" id="sSrv" placeholder="服务端地址，如 https://api.toubabazwhale.top">
+      <div class="hint">已内置默认地址并启用：日记、心愿、爱心币、胶囊、发泄屋战绩在两台设备间互通。换服务器才需要改这一栏。</div>
     </div>
     <div class="formrow" id="rowMe" style="display:none">
       <label>这台设备是谁的（互通身份）</label>
@@ -626,6 +709,15 @@ body.night .coinchip{color:#e8c064;background:rgba(255,205,100,.1)}
   </div>
 </div>
 
+<!-- 恋爱年报弹窗 -->
+<div class="modal" id="mdlYear">
+  <div class="sheet" style="max-width:520px">
+    <h3>📊 恋爱年报</h3>
+    <div class="yearcard" id="yearBody"></div>
+    <div class="sheetbtns"><button class="btn" id="yearClose">收好 💫</button></div>
+  </div>
+</div>
+
 <div id="rain"></div>
 <div id="rainTip" style="display:none">🌧️ 滴滴答答…点击任意处停止</div>
 <div id="toast"></div>
@@ -693,6 +785,8 @@ function freshData(){
     coinLog:[],
     coupons:{custom:[],wallet:[],used:[]},
     capsules:[],
+    foodPool:['火锅','烧烤','麻辣烫','奶茶','日料','饺子','汉堡','米线'],
+    vent:{count:0,juice:0},
     wishes:[
       {id:'w1',text:'一起去看一次海',done:false},
       {id:'w2',text:'一起吃一顿热气腾腾的火锅',done:false},
@@ -723,6 +817,8 @@ function migrate(){
   data.coupons.used.forEach(u=>{if(!u.owner)u.owner='her';});
   if(!data.capsules)data.capsules=[];
   if(!data.interactions)data.interactions=[];
+  if(!Array.isArray(data.foodPool)||!data.foodPool.length)data.foodPool=['火锅','烧烤','麻辣烫','奶茶','日料','饺子','汉堡','米线'];
+  if(!data.vent)data.vent={count:0,juice:0};
   if(data.love&&data.love.coins!==undefined)delete data.love.coins;
 }
 migrate();
@@ -1216,49 +1312,187 @@ $('#btnLedger').onclick=()=>{ledgerTab='grant';renderLedger();$('#mdlLedger').cl
 $('#ledgerClose').onclick=()=>$('#mdlLedger').classList.remove('on');
 document.querySelectorAll('.ltab').forEach(x=>x.onclick=()=>{ledgerTab=x.dataset.ltab;renderLedger();});
 
-/* ================= 云同步（LeanCloud） =================
-   在 ⚙️ 设置里填入 LeanCloud 的 AppID / AppKey / REST 服务器地址即可启用；
-   不填则保持单机模式。数据整包存云端（last-write-wins），25 秒轮询互通。 */
-const CLOUD=(function(){
-  try{const c=JSON.parse(localStorage.getItem(KEY+'_cloud')||'null');
-    if(c&&c.appId&&c.appKey&&c.server)return c;
+/* ================= 玩乐：发泄屋/转盘/骰子/年报 ================= */
+let ventHp=100,ventKO=false,juiceDone=false,ventCtx=null,wheelAngle=0,wheelSpinning=false;
+const VENT_LINES={whip:['啪！','呀！！','疼疼疼！','我做错什么了嘛！','呜——下次不敢了！','鞭下留人！'],
+  fist:['咚！','哼，打不过','你开心就好…','轻点轻点！','别打脸，还要营业的'],
+  ko:['抱抱就原谅你了…','我错了，真的错了','求和好 💔','你舍得让我倒下吗']};
+function ventSfx(kind){
+  try{
+    ventCtx=ventCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const len=kind==='whip'?.12:.15;
+    const buf=ventCtx.createBuffer(1,Math.floor(ventCtx.sampleRate*len),ventCtx.sampleRate);
+    const ch=buf.getChannelData(0);
+    for(let i=0;i<ch.length;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2);
+    const src=ventCtx.createBufferSource();src.buffer=buf;
+    const f=ventCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=kind==='whip'?2600:900;
+    const g=ventCtx.createGain();g.gain.value=.5;
+    src.connect(f);f.connect(g);g.connect(ventCtx.destination);src.start();
   }catch(e){}
-  return {appId:'填入AppID',appKey:'填入AppKey',server:'填入服务器地址'};
-})();
-const CLOUD_ON=[CLOUD.appId,CLOUD.appKey,CLOUD.server].every(v=>v&&!v.includes('填入'));
-const ROOM_NAME='lelin';
+}
+function renderVent(){
+  const d=$('#ventDoll');
+  if(d&&d.src!==$('#hisDoll').src)d.src=$('#hisDoll').src;
+  $('#ventHpFill').style.width=ventHp+'%';
+  $('#ventFill').style.width=data.vent.juice+'%';
+  $('#ventText').textContent=data.vent.juice+'/100';
+}
+function ventHit(tool){
+  if(ventKO)return;
+  const dmg=tool==='whip'?6+Math.floor(Math.random()*8):8+Math.floor(Math.random()*10);
+  ventHp=Math.max(0,ventHp-dmg);
+  data.vent.count++;
+  data.vent.juice=Math.min(100,data.vent.juice+(tool==='whip'?7+Math.floor(Math.random()*6):9+Math.floor(Math.random()*7)));
+  save();ventSfx(tool);
+  const d=$('#ventDoll');
+  d.classList.remove('hit');void d.offsetWidth;d.classList.add('hit');
+  fx($('#ventStage'),tool==='whip'?'💢':'✦','heart','left:'+(35+Math.random()*30)+'%;top:'+(18+Math.random()*26)+'%;font-size:'+(16+Math.random()*14)+'px');
+  $('#ventLine').textContent=pick(VENT_LINES[tool]);
+  if(data.vent.juice>=100&&!juiceDone){
+    juiceDone=true;
+    for(let i=0;i<26;i++)fx($('#ventStage'),pick(['🎉','✨','💞','🌟']),'confetti','left:'+(6+Math.random()*88)+'%;top:'+(4+Math.random()*16)+'%;font-size:'+(13+Math.random()*14)+'px;animation-delay:'+(Math.random()*.5)+'s');
+    toast('😤 解气值拉满！气消了就回首页抱抱和好吧 💞');
+  }
+  if(ventHp<=0){
+    ventKO=true;d.classList.add('ko');
+    $('#ventLine').textContent=pick(VENT_LINES.ko);
+    setTimeout(()=>{ventKO=false;ventHp=100;d.classList.remove('ko');renderVent();},3000);
+  }
+  renderVent();
+}
+$('#ventDoll').addEventListener('click',()=>ventHit('fist'));
+$('#ventWhip').onclick=()=>ventHit('whip');
+$('#ventFist').onclick=()=>ventHit('fist');
+$('#ventMakeup').onclick=()=>{
+  data.vent.juice=0;juiceDone=false;save();renderVent();
+  fx($('#ventStage'),'💞','bigheart','left:42%;top:12%');
+  $('#ventLine').textContent='和好啦，回首页抱抱 TA 吧 💞';
+  toast('🤝 和好啦 💞');pushAct('makeup');
+};
+const DICE_ACTIONS=['抱十秒不撒手','亲一下额头','说三句情话','捏捏对方的小脸','互相说一句谢谢','唱两句歌（什么歌都行）','背对背站十秒','给对方一个拥抱','夸对方三个优点','对视十秒不许笑'];
+const TRUTHS=['第一次见我时，你心里在想什么？','你觉得我身上最可爱的点是什么？','说一件你偷偷为我做过、我没发现的事','你手机里我最好看的照片是哪一张？','如果给我们的感情打分，你打几分？为什么？','我的哪个习惯你最受不了但又能忍？','你什么时候确定要认真和我走下去的？','最近一次突然想我是什么时候？在干嘛？','你希望我们五年后在哪里、在做什么？','说一件你从没告诉过我的糗事','我们的第一次见面，你记得多少细节？','你觉得我们吵架时谁更凶？','如果我生气了，你的第一反应是什么？','你最想和我完成的一个心愿是什么？','你上一次说“我爱你”是什么时候？'];
+const DARES=['用恋人的口吻发一条朋友圈（半小时后可删）','模仿对方最经典的动作或口头禅','唱一首歌的高潮部分','给对方捏捏肩 or 倒杯水','对着窗外小声喊“我最爱TA”','让 TA 在你手心画个图案，保留到明天','发一段 60 秒语音，全是夸 TA 的话','用夸张的自拍姿势合影一张','当场做 10 个深蹲，边做边喊对方名字','用撒娇语气说三遍“人家错了嘛”','表演一个对方生气的样子','闭眼让 TA 喂你吃一样东西','不放音乐跳 15 秒舞','讲一个只有你俩知道的秘密','下周请对方喝一杯奶茶'];
+$('#diceBtn').onclick=()=>{
+  const f=$('#diceFace');f.classList.remove('roll');void f.offsetWidth;f.classList.add('roll');
+  setTimeout(()=>{f.textContent='💫';$('#diceResult').innerHTML='🎲 '+esc(pick(DICE_ACTIONS));},600);
+};
+$('#truthBtn').onclick=()=>{$('#diceResult').innerHTML='💬 真心话：'+esc(pick(TRUTHS));};
+$('#dareBtn').onclick=()=>{$('#diceResult').innerHTML='🔥 大冒险：'+esc(pick(DARES));};
+function drawWheel(){
+  const cv=$('#wheelCv');if(!cv)return;
+  const x=cv.getContext('2d');const pool=data.foodPool;
+  x.clearRect(0,0,240,240);x.save();x.translate(120,120);x.rotate(wheelAngle);
+  const n=pool.length,seg=2*Math.PI/n;
+  for(let i=0;i<n;i++){
+    x.beginPath();x.moveTo(0,0);x.arc(0,0,112,i*seg,(i+1)*seg);x.closePath();
+    x.fillStyle=i%2?'#f9c2d6':'#a9d4f5';x.fill();
+    x.strokeStyle='#ffffff';x.lineWidth=2;x.stroke();
+    x.save();x.rotate(i*seg+seg/2);x.fillStyle='#324a5e';x.font='bold 13px sans-serif';x.textAlign='right';x.textBaseline='middle';x.fillText(pool[i],104,0);x.restore();
+  }
+  x.restore();
+  x.beginPath();x.arc(120,120,24,0,7);x.fillStyle='#ffffff';x.fill();
+  x.font='18px serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🎯',120,121);
+}
+function renderFoods(){
+  $('#foodList').innerHTML=data.foodPool.map((f,i)=>'<span class="foodchip">'+esc(f)+'<b data-fdel="'+i+'">✕</b></span>').join('');
+  drawWheel();
+}
+function spinWheel(){
+  if(wheelSpinning)return;
+  if(!data.foodPool.length){toast('池子空了，先加几个想吃的～');return;}
+  wheelSpinning=true;$('#wheelResult').textContent='转起来…';
+  const turns=5+Math.random()*3,target=wheelAngle+turns*2*Math.PI;
+  const t0=performance.now(),dur=3800,from=wheelAngle;
+  (function anim(now){
+    const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+    wheelAngle=from+(target-from)*e;drawWheel();
+    if(k<1)requestAnimationFrame(anim);
+    else{
+      wheelSpinning=false;
+      const n=data.foodPool.length,seg=2*Math.PI/n;
+      const a=(((-Math.PI/2)-wheelAngle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+      const food=data.foodPool[Math.floor(a/seg)]||data.foodPool[0];
+      $('#wheelResult').innerHTML='今晚就吃：<b style="color:var(--deepr)">'+esc(food)+'</b>！🎯';
+      toast('🍽️ 转盘拍板：'+food);
+    }
+  })(t0);
+}
+$('#spinBtn').onclick=spinWheel;
+$('#foodAdd').onclick=()=>{
+  const v=$('#foodInput').value.trim();
+  if(!v){toast('先写个名字～');return;}
+  if(data.foodPool.length>=12){toast('池子最多 12 个，先删一个吧');return;}
+  data.foodPool.push(v);save();$('#foodInput').value='';renderFoods();
+};
+$('#foodList').addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-fdel]');
+  if(!b)return;
+  if(data.foodPool.length<=1){toast('至少留一个选项哦');return;}
+  data.foodPool.splice(+b.dataset.fdel,1);save();renderFoods();
+});
+function renderYear(){
+  const days=daysTogether();
+  const nE=data.entries.length;
+  const nH=data.entries.filter(e=>e.author==='her').length;
+  const nM=data.entries.filter(e=>e.author==='him').length;
+  const moodCount={};data.entries.forEach(e=>{if(e.mood)moodCount[e.mood]=(moodCount[e.mood]||0)+1;});
+  const topMood=Object.keys(moodCount).sort((a,b)=>moodCount[b]-moodCount[a])[0];
+  const wishDone=data.wishes.filter(w=>w.done).length,wishAll=data.wishes.length;
+  const grants=data.coinLog.reduce((s,l)=>s+l.amount,0);
+  const row=(i,label,v)=>'<div class="yearrow"><span>'+i+' '+label+'</span><b>'+v+'</b></div>';
+  $('#yearBody').innerHTML='<div class="yeartitle">🌸 '+esc(data.names.her)+' & ⭐ '+esc(data.names.him)+' 的小窝年报</div>'
+    +row('💞','在一起',days+' 天')
+    +row('📝','日记',nE+' 篇（'+esc(data.names.her)+' '+nH+' / '+esc(data.names.him)+' '+nM+'）')
+    +row('💗','亲密度','Lv.'+data.love.level+' · 互动 '+data.love.total+' 次')
+    +row('🪙','累计发币',grants+' 枚')
+    +row('🎟️','兑换券','已核销 '+data.coupons.used.length+' 张')
+    +row('✅','心愿完成',wishDone+' / '+wishAll)
+    +row('⏳','时间胶囊',data.capsules.length+' 封')
+    +row('🥊','发泄屋出拳',data.vent.count+' 次')
+    +(topMood?row('💭','最常的心情',esc(topMood)):'')
+    +'<div class="yeartitle" style="margin-top:10px">往后的每一天，也请多多指教 💞</div>';
+}
+$('#yearBtn').onclick=()=>{renderYear();$('#mdlYear').classList.add('on');};
+$('#yearClose').onclick=()=>$('#mdlYear').classList.remove('on');
+
+/* ================= 云同步（Cloudflare Worker，与投票吧同一套服务） ================= */
+const SRV_DEFAULT='https://api.toubabazwhale.top';
+const SRV=(function(){try{const s=localStorage.getItem(KEY+'_srv');if(s)return s.replace(/\/+$/,'');}catch(e){}return SRV_DEFAULT;})();
+const CLOUD_ON=true;
+const ROOM='lelin';
 let me=null;try{me=localStorage.getItem(KEY+'_me');}catch(e){}
 if(me!=='her'&&me!=='him')me=null;
-let cloudOid=null;try{cloudOid=localStorage.getItem(KEY+'_oid');}catch(e){}
 let myRev=0,cloudBusy=false,pushTimer=null;
 let seenAct=0;try{seenAct=Number(localStorage.getItem(KEY+'_seenAct'))||0;}catch(e){}
 
 function setSyncState(t){const el=$('#syncState');if(el)el.textContent='☁️ 云同步：'+t;}
-function lcHeaders(){return {'X-LC-Id':CLOUD.appId,'X-LC-Key':CLOUD.appKey,'Content-Type':'application/json'};}
-async function lcQuery(){
-  const url=CLOUD.server+'/1.1/classes/LelinRoom?limit=1&order=createdAt&where='+encodeURIComponent(JSON.stringify({room:ROOM_NAME}));
-  const r=await fetch(url,{headers:lcHeaders()});
-  if(!r.ok)throw new Error('query '+r.status);
+async function cloudGet(){
+  const r=await fetch(SRV+'/api/doc?room='+ROOM);
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error('get '+r.status);
   const j=await r.json();
-  return (j.results&&j.results[0])||null;
+  if(j.empty)return null;
+  return {payload:j.payload||'',updatedAt:j.rev||0};
 }
-async function lcCreate(){
-  const r=await fetch(CLOUD.server+'/1.1/classes/LelinRoom',{method:'POST',headers:lcHeaders(),
-    body:JSON.stringify({room:ROOM_NAME,rev:0,payload:JSON.stringify(data),seen_her:0,seen_him:0})});
-  if(!r.ok)throw new Error('create '+r.status);
+async function cloudPutDoc(payload){
+  const r=await fetch(SRV+'/api/doc?room='+ROOM,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room:ROOM,payload:payload})});
+  if(!r.ok)throw new Error('put '+r.status);
   return await r.json();
 }
-async function lcPut(cols){
-  const r=await fetch(CLOUD.server+'/1.1/classes/LelinRoom/'+cloudOid,{method:'PUT',headers:lcHeaders(),body:JSON.stringify(cols)});
-  if(!r.ok)throw new Error('put '+r.status);
+async function cloudPing(){
+  try{await fetch(SRV+'/api/ping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room:ROOM,who:me})});}catch(e){}
 }
-function rememberPeer(rec){
+async function cloudPeer(){
+  try{const r=await fetch(SRV+'/api/peer?room='+ROOM+'&who='+encodeURIComponent(me||''));if(r.ok){const j=await r.json();return j.ts||0;}}catch(e){}
+  return 0;
+}
+function cloudDelete(){try{fetch(SRV+'/api/doc?room='+ROOM,{method:'DELETE'});}catch(e){}}
+function rememberPeer(peerTs){
   if(!CLOUD_ON){$('#peerLine').style.display='none';return;}
   $('#peerLine').style.display='block';
   const other=me==='her'?'him':'her';
-  const ts=rec?rec['seen_'+other]||0:0;
-  if(!ts){$('#peerLine').textContent=data.names[other]+' 还没来过云端小窝，快去喊 TA～';return;}
-  const mins=Math.max(1,Math.round((Date.now()-ts)/60000));
+  if(!peerTs){$('#peerLine').textContent=data.names[other]+' 还没来过云端小窝，快去喊 TA～';return;}
+  const mins=Math.max(1,Math.round((Date.now()-peerTs)/60000));
   const tt=mins<60?mins+' 分钟前':(mins<1440?Math.round(mins/60)+' 小时前':Math.round(mins/1440)+' 天前');
   $('#peerLine').textContent=data.names[other]+' '+tt+'来过这里 💞';
 }
@@ -1269,7 +1503,7 @@ function announceActs(){
     const nm=data.names[a.from]||'对方';
     const map={hug:['🤗','给了你一个大大的抱抱'],kiss:['😘','亲了你一口'],poke:['👉','偷偷戳了戳你'],
       feed:['🍽️','投喂了你'],rain:['🌧️','邀请你一起听雨'],levelup:['💖','我们的亲密度升级啦！'],
-      grant:['💰','给你发了爱心币'],coupon:['🎟️','换了一张新券等着兑现'],use:['💝','用掉了一张券']};
+      grant:['💰','给你发了爱心币'],coupon:['🎟️','换了一张新券等着兑现'],use:['💝','用掉了一张券'],makeup:['💞','主动和你和好了']};
     const pair=map[a.type]||['💗','来找你玩啦'];
     toast(pair[0]+' '+nm+' '+pair[1]);
     if(a.from)say(a.from,pair[1]+'～');
@@ -1279,7 +1513,7 @@ function announceActs(){
   try{localStorage.setItem(KEY+'_seenAct',seenAct);}catch(e){}
 }
 function adoptCloud(rec){
-  myRev=rec.rev||0;
+  myRev=rec.updatedAt||myRev;
   try{
     const d=JSON.parse(rec.payload||'null');
     if(d&&d.names){
@@ -1290,17 +1524,13 @@ function adoptCloud(rec){
     }
   }catch(e){}
   announceActs();
-  rememberPeer(rec);
 }
 async function cloudPush(){
-  if(!CLOUD_ON||!cloudOid||cloudBusy)return;
+  if(!CLOUD_ON||cloudBusy)return;
   cloudBusy=true;
   try{
-    data.rev=Date.now();
-    const cols={rev:data.rev,payload:JSON.stringify(data)};
-    if(me)cols['seen_'+me]=Date.now();
-    await lcPut(cols);
-    myRev=data.rev;
+    const j=await cloudPutDoc(JSON.stringify(data));
+    myRev=(j&&j.rev)||Date.now();
     setSyncState('已同步 ✓');
   }catch(e){setSyncState('暂时离线，改动已存本机');}
   cloudBusy=false;
@@ -1312,16 +1542,13 @@ function schedulePush(){
   pushTimer=setTimeout(cloudPush,800);
 }
 async function cloudPull(){
-  if(!CLOUD_ON||!cloudOid||cloudBusy)return;
+  if(!CLOUD_ON||cloudBusy)return;
   cloudBusy=true;
   try{
-    const r=await fetch(CLOUD.server+'/1.1/classes/LelinRoom/'+cloudOid,{headers:lcHeaders()});
-    if(r.ok){
-      const rec=await r.json();
-      if((rec.rev||0)>myRev)adoptCloud(rec);else rememberPeer(rec);
-      if(me)lcPut({['seen_'+me]:Date.now()}).catch(()=>{});
-      setSyncState('已连接 ✓');
-    }else setSyncState('云端暂时够不着');
+    const rec=await cloudGet();
+    if(rec&&(rec.updatedAt||0)>myRev)adoptCloud(rec);
+    if(me){await cloudPing();rememberPeer(await cloudPeer());}
+    setSyncState('已连接 ✓');
   }catch(e){setSyncState('暂时离线，改动已存本机');}
   cloudBusy=false;
 }
@@ -1329,18 +1556,17 @@ async function cloudInit(){
   if(!CLOUD_ON)return;
   setSyncState('连接云端中…');
   try{
-    let rec=cloudOid?null:await lcQuery();
-    if(!rec&&cloudOid){
-      const r=await fetch(CLOUD.server+'/1.1/classes/LelinRoom/'+cloudOid,{headers:lcHeaders()});
-      rec=r.ok?await r.json():null;
-    }
-    if(!rec){
-      const c=await lcCreate();
-      cloudOid=c.objectId;
+    const rec=await cloudGet();
+    if(rec&&rec.payload){
+      try{
+        const d=JSON.parse(rec.payload);
+        if(d&&d.names){data=d;migrate();saveLocal();renderAll();if(data.initialized)$('#mdlWelcome').classList.remove('on');}
+        myRev=rec.updatedAt||0;
+      }catch(e){}
     }else{
-      cloudOid=rec.objectId;
+      await cloudPutDoc(JSON.stringify(data));
+      myRev=Date.now();
     }
-    try{localStorage.setItem(KEY+'_oid',cloudOid);}catch(e){}
     setSyncState('已连接 ✓');
     if(me)cloudPull();
     else if(data.initialized)showMeModal();
@@ -1369,7 +1595,7 @@ $('#meBtnHim').onclick=()=>chooseMe('him');
 $('#sMe1').onclick=()=>chooseMe('her',true);
 $('#sMe2').onclick=()=>chooseMe('him',true);
 
-/* ================= 时间胶囊 ================= */
+/* ================= 时间胶囊 ================= *//* ================= 时间胶囊 ================= *//* ================= 时间胶囊 ================= *//* ================= 时间胶囊 ================= */
 function renderCapsules(){
   const el=$('#capsuleList');
   const sorted=data.capsules.slice().sort((a,b)=>(a.opened?1:0)-(b.opened?1:0)||a.date.localeCompare(b.date));
@@ -1436,10 +1662,7 @@ function openSettings(){
   $('#sDate').value=data.startDate;
   $('#sAv1').src=data.av1||'';
   $('#sAv2').src=data.av2||'';
-  const cc=(function(){try{return JSON.parse(localStorage.getItem(KEY+'_cloud')||'null');}catch(e){return null;}})()||{};
-  $('#sCloudId').value=cc.appId&&!cc.appId.includes('填入')?cc.appId:'';
-  $('#sCloudKey').value=cc.appKey&&!cc.appKey.includes('填入')?cc.appKey:'';
-  $('#sCloudUrl').value=cc.server&&!cc.server.includes('填入')?cc.server:'';
+  $('#sSrv').value=SRV;
   $('#rowMe').style.display=CLOUD_ON?'block':'none';
   $('#sMe1').className='abtn'+(me==='her'?' on-a1':'');
   $('#sMe2').className='abtn'+(me==='him'?' on-a2':'');
@@ -1456,19 +1679,14 @@ $('#sSave').onclick=()=>{
   if($('#sDate').value)data.startDate=$('#sDate').value;
   const ann=data.anniversaries.find(a=>a.id==='ann1');
   if(ann)ann.date=data.startDate;
-  const cid=$('#sCloudId').value.trim(),ck2=$('#sCloudKey').value.trim(),cu2=$('#sCloudUrl').value.trim();
+  const sv=$('#sSrv').value.trim().replace(/\/+$/,'');
   let cloudChanged=false;
-  if(cid&&ck2&&cu2){
-    const cur=(function(){try{return JSON.parse(localStorage.getItem(KEY+'_cloud')||'null');}catch(e){return null;}})()||{};
-    if(cur.appId!==cid||cur.appKey!==ck2||cur.server!==cu2){
-      try{localStorage.setItem(KEY+'_cloud',JSON.stringify({appId:cid,appKey:ck2,server:cu2}));}catch(e){}
-      cloudChanged=true;
-    }
-  }else if(!cid&&!ck2&&!cu2&&localStorage.getItem(KEY+'_cloud')){
-    try{localStorage.removeItem(KEY+'_cloud');}catch(e){}
+  if(sv&&sv!==SRV){
+    try{localStorage.setItem(KEY+'_srv',sv);}catch(e){}
     cloudChanged=true;
-  }else if(cid||ck2||cu2){
-    toast('云端三项要填全才会生效哦（或全部留空关闭）');
+  }else if(!sv&&SRV!==SRV_DEFAULT){
+    try{localStorage.removeItem(KEY+'_srv');}catch(e){}
+    cloudChanged=true;
   }
   save();applyNames();renderAll();
   $('#mdlSet').classList.remove('on');
@@ -1517,7 +1735,7 @@ $('#importFile').onchange=ev=>{
 };
 $('#btnReset').onclick=()=>{
   if(confirm('确定清空全部数据吗？此操作无法恢复！')&&confirm('真的真的要清空吗？建议先导出备份！')){
-    if(CLOUD_ON&&cloudOid){try{fetch(CLOUD.server+'/1.1/classes/LelinRoom/'+cloudOid,{method:'DELETE',headers:lcHeaders()});}catch(e){}}
+    if(CLOUD_ON)cloudDelete();
     try{localStorage.removeItem(KEY);}catch(e){}
     location.reload();
   }
@@ -1583,7 +1801,7 @@ requestAnimationFrame(dollTick);
 
 /* ================= 总渲染 ================= */
 function renderAll(){
-  renderHero();renderDiary();renderAnn();renderWishes();renderCoupons();renderCoins();renderCapsules();renderCapBanner();renderLove();applyAvatars();applyNames();
+  renderHero();renderDiary();renderAnn();renderWishes();renderCoupons();renderCoins();renderCapsules();renderVent();renderFoods();renderCapBanner();renderLove();applyAvatars();applyNames();
 }
 buildBg();fillMoodSelect();buildMoodRow();applyTheme();
 renderAll();
